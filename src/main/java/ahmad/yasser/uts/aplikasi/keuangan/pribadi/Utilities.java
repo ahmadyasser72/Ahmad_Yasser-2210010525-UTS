@@ -4,6 +4,10 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.Component;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
@@ -146,5 +150,9 @@ public class Utilities {
         }
 
         return true;  // Jika silent, anggap Ya
+    }
+    
+    public LocalDateTime roundDateToMidnight(Date date) {
+        return date == null ? null : LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()).atStartOfDay();
     }
 }

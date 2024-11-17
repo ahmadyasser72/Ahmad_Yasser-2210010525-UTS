@@ -10,9 +10,9 @@ import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -47,7 +47,16 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         }
 
         this.populateComboBoxItems(); // Mengisi item pada ComboBox
+        this.syncDateFormat(); // Menyinkronkan format tanggal
         this.resetForm(); // Mengatur ulang tampilan awal formulir
+    }
+
+    // Menyinkronkan format tanggal pada semua komponen pemilih tanggal.
+    private void syncDateFormat() {
+        var pattern = this.dateFormatter.toPattern();
+        jDateChooserDate.setDateFormatString(pattern);
+        jDateChooserDateAwalFilter.setDateFormatString(pattern);
+        jDateChooserDateAkhirFilter.setDateFormatString(pattern);
     }
 
     // Mengisi ComboBox dengan data dari enum Account dan TransactionType
@@ -76,22 +85,35 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         }
     }
 
-    // Memperbarui tampilan tabel berdasarkan filter akun dan tipe transaksi
+    // Memperbarui tampilan tabel berdasarkan filter akun, tipe transaksi, dan tanggal.
     private void updateTableView() {
-        var filterAkun = (String) jComboBoxAccountFilter.getSelectedItem(); // Filter akun yang dipilih
-        var filterTipeTransaksi = (String) jComboBoxTransactionTypeFilter.getSelectedItem(); // Filter tipe transaksi yang dipilih
+        var filterAkun = (String) jComboBoxAccountFilter.getSelectedItem(); // Filter akun
+        var filterTipeTransaksi = (String) jComboBoxTransactionTypeFilter.getSelectedItem(); // Filter tipe transaksi
 
-        var filteredRecords = new ArrayList<Transactions>(); // Daftar untuk menyimpan transaksi yang telah difilter
-        for (var entry : this.records) { // Iterasi setiap transaksi
-            // Tambahkan transaksi ke daftar jika memenuhi kriteria filter
-            if ((filterAkun.equals("-") || filterAkun.equals(entry.account.getName()))
-                    && (filterTipeTransaksi.equals("-") || filterTipeTransaksi.equals(entry.transactionType.getName()))) {
-                filteredRecords.add(entry);
-            }
-        }
+        // Menyaring data berdasarkan filter yang dipilih
+        var filteredRecords = this.records.stream()
+                // Menyaring berdasarkan akun jika filter tidak "-"
+                .filter(entry -> filterAkun.equals("-") || filterAkun.equals(entry.account.getName()))
+                // Menyaring berdasarkan tipe transaksi jika filter tidak "-"
+                .filter(entry -> filterTipeTransaksi.equals("-") || filterTipeTransaksi.equals(entry.transactionType.getName()))
+                // Menyaring berdasarkan rentang tanggal yang dipilih
+                .filter(entry -> {
+                    try {
+                        var date = utils.roundDateToMidnight(dateFormatter.parse(entry.date)); // Mengonversi tanggal ke midnight
+                        var from = utils.roundDateToMidnight(jDateChooserDateAwalFilter.getDate()); // Tanggal awal filter
+                        var to = utils.roundDateToMidnight(jDateChooserDateAkhirFilter.getDate()); // Tanggal akhir filter
 
-        this.tableModel.setRecords(filteredRecords); // Mengisi model tabel dengan data yang telah difilter
-        jTable1.getSelectionModel().clearSelection(); // Menghapus seleksi di tabel
+                        // Memeriksa apakah tanggal berada dalam rentang yang valid
+                        return (from == null || date.compareTo(from) >= 0)
+                                && (to == null || date.compareTo(to) <= 0);
+                    } catch (ParseException ex) {
+                        return false; // Jika terjadi error parsing tanggal, data ini diabaikan
+                    }
+                })
+                .collect(Collectors.toList()); // Mengumpulkan hasil filter menjadi daftar
+
+        this.tableModel.setRecords(filteredRecords); // Update model tabel dengan data yang sudah difilter
+        jTable1.getSelectionModel().clearSelection(); // Hapus seleksi di tabel
     }
 
     // Mengatur ulang formulir ke kondisi awal
@@ -147,6 +169,10 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jComboBoxTransactionTypeFilter = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
         jComboBoxAccountFilter = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
+        jDateChooserDateAwalFilter = new com.toedter.calendar.JDateChooser();
+        jLabel9 = new javax.swing.JLabel();
+        jDateChooserDateAkhirFilter = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -187,8 +213,6 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
         jPanel1.add(jLabel4, gridBagConstraints);
-
-        jDateChooserDate.setDateFormatString("yyyy-MM-dd");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -229,6 +253,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jTextAreaNote.setColumns(20);
         jTextAreaNote.setLineWrap(true);
         jTextAreaNote.setRows(5);
+        jTextAreaNote.setWrapStyleWord(true);
         jScrollPane1.setViewportView(jTextAreaNote);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -324,32 +349,93 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jPanel2.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        jPanel3.setLayout(new java.awt.GridLayout(1, 4, 4, 4));
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
+        java.awt.GridBagLayout jPanel3Layout = new java.awt.GridBagLayout();
+        jPanel3Layout.columnWidths = new int[] {0, 8, 0, 8, 0, 8, 0};
+        jPanel3Layout.rowHeights = new int[] {0, 8, 0};
+        jPanel3.setLayout(jPanel3Layout);
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel6.setText("Tipe Transaksi");
-        jPanel3.add(jLabel6);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jLabel6, gridBagConstraints);
 
         jComboBoxTransactionTypeFilter.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-" }));
+        jComboBoxTransactionTypeFilter.setPreferredSize(new java.awt.Dimension(100, 24));
         jComboBoxTransactionTypeFilter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxTransactionTypeFilterActionPerformed(evt);
             }
         });
-        jPanel3.add(jComboBoxTransactionTypeFilter);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jComboBoxTransactionTypeFilter, gridBagConstraints);
 
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel7.setText("Akun");
-        jPanel3.add(jLabel7);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jLabel7, gridBagConstraints);
 
         jComboBoxAccountFilter.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-" }));
+        jComboBoxAccountFilter.setPreferredSize(new java.awt.Dimension(100, 24));
         jComboBoxAccountFilter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxAccountFilterActionPerformed(evt);
             }
         });
-        jPanel3.add(jComboBoxAccountFilter);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jComboBoxAccountFilter, gridBagConstraints);
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel8.setText("Tanggal Awal");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jLabel8, gridBagConstraints);
+
+        jDateChooserDateAwalFilter.setPreferredSize(new java.awt.Dimension(100, 24));
+        jDateChooserDateAwalFilter.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jDateChooserDateAwalFilterPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jDateChooserDateAwalFilter, gridBagConstraints);
+
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel9.setText("Tanggal Akhir");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jLabel9, gridBagConstraints);
+
+        jDateChooserDateAkhirFilter.setPreferredSize(new java.awt.Dimension(100, 24));
+        jDateChooserDateAkhirFilter.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jDateChooserDateAkhirFilterPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jDateChooserDateAkhirFilter, gridBagConstraints);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
@@ -492,6 +578,32 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButtonHapusActionPerformed
 
+    private void jDateChooserDateAwalFilterPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooserDateAwalFilterPropertyChange
+        if (!evt.getPropertyName().equals("date")) {
+            return; // Hanya merespon perubahan properti "date"
+        }
+        
+        // Filter tanggal akhir tidak boleh kurang dari tanggal awal,
+        // jadi set tanggal minimum untuk filter tanggal akhir
+        // dengan tanggal yang dipilih di filter tanggal awal
+        jDateChooserDateAkhirFilter.setMinSelectableDate(jDateChooserDateAwalFilter.getDate());
+        updateTableView();
+        resetControls();
+    }//GEN-LAST:event_jDateChooserDateAwalFilterPropertyChange
+
+    private void jDateChooserDateAkhirFilterPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooserDateAkhirFilterPropertyChange
+        if (!evt.getPropertyName().equals("date")) {
+            return; // Hanya merespon perubahan properti "date"
+        }
+        
+        // Filter tanggal awal tidak boleh lebih dari tanggal akhir,
+        // jadi set tanggal maksimum untuk filter tanggal awal
+        // dengan tanggal yang dipilih di filter tanggal akhir
+        jDateChooserDateAwalFilter.setMaxSelectableDate(jDateChooserDateAkhirFilter.getDate());
+        updateTableView();
+        resetControls();
+    }//GEN-LAST:event_jDateChooserDateAkhirFilterPropertyChange
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -578,6 +690,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jComboBoxTransactionType;
     private javax.swing.JComboBox<String> jComboBoxTransactionTypeFilter;
     private com.toedter.calendar.JDateChooser jDateChooserDate;
+    private com.toedter.calendar.JDateChooser jDateChooserDateAkhirFilter;
+    private com.toedter.calendar.JDateChooser jDateChooserDateAwalFilter;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -585,6 +699,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
