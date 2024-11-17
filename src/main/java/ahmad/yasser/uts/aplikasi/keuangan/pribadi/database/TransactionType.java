@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public enum TransactionType {
 
-    INCOME(1, "Income"),
-    EXPENSE(2, "Expense");
+    INCOME(1, "Pemasukan"),
+    EXPENSE(2, "Pengeluaran");
 
     private static final Map<Integer, TransactionType> lookup = new HashMap<>();
 

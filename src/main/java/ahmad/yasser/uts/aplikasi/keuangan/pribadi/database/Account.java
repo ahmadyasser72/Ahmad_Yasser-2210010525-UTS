@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public enum Account {
 
-    CASH(1, "Cash"),
+    CASH(1, "Tunai"),
     BANK(2, "Bank"),
-    INVESTMENT(3, "Investment");
+    E_WALLET(3, "E-Wallet");
 
     private static final Map<Integer, Account> lookup = new HashMap<>();
 

@@ -15,19 +15,19 @@ import java.util.List;
 public class Transactions {
 
     // Variabel statis untuk nama database
-    private static final String DATABASE_URL = "jdbc:sqlite:your_database_path.db";  // Ganti path sesuai kebutuhan
+    private static final String DATABASE_URL = "jdbc:sqlite:aplikasi-keuangan.db";  // Ganti path sesuai kebutuhan
     private static Connection conn;
 
     // Field untuk data transaksi
-    private int id;
-    private String date;
-    private double amount;
-    private TransactionType transactionType;
-    private Account account;
-    private String note;
+    public final Integer id;
+    public final String date;
+    public final double amount;
+    public final TransactionType transactionType;
+    public final Account account;
+    public final String note;
 
     // Konstruktor untuk transaksi baru
-    public Transactions(int id, String date, double amount, TransactionType transactionType, Account account, String note) {
+    public Transactions(Integer id, String date, double amount, TransactionType transactionType, Account account, String note) {
         this.id = id;
         this.date = date;
         this.amount = amount;
