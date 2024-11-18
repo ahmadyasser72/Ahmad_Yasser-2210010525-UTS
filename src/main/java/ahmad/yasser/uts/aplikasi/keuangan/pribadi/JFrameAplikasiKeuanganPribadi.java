@@ -22,7 +22,7 @@ import javax.swing.DefaultComboBoxModel;
  * @author x
  */
 public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
-
+  
     // List untuk menyimpan data transaksi
     private List<Transactions> records;
 
@@ -37,7 +37,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
     // Utilitas tambahan untuk membantu berbagai operasi
     private final Utilities utils;
-
+    
     // Konstruktor untuk JFrame aplikasi keuangan pribadi
     // - Menginisialisasi komponen GUI
     // - Menentukan lokasi jendela agar muncul di tengah layar
@@ -206,6 +206,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jLabelTotalPengeluaran = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Aplikasi Keuangan Pribadi");
 
         jSplitPane1.setDividerLocation(320);
 
@@ -520,7 +521,6 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
             // Tangani kesalahan SQL dengan dialog error
             utils.showErrorDialog(ex, "menambah data");
         }
-
     }//GEN-LAST:event_jButtonTambahActionPerformed
 
     private void jComboBoxTransactionTypeFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxTransactionTypeFilterActionPerformed
@@ -566,7 +566,6 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jButtonTambah.setEnabled(false);  // Nonaktifkan tombol Tambah
         jButtonUpdate.setEnabled(true);   // Aktifkan tombol Update
         jButtonHapus.setEnabled(true);    // Aktifkan tombol Hapus
-
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
@@ -700,29 +699,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows Classic".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JFrameAplikasiKeuanganPribadi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JFrameAplikasiKeuanganPribadi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JFrameAplikasiKeuanganPribadi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JFrameAplikasiKeuanganPribadi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
+        com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.setup();
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
