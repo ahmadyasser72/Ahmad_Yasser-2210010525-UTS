@@ -8,9 +8,11 @@ import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Account;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.TransactionType;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
@@ -21,10 +23,19 @@ import javax.swing.DefaultComboBoxModel;
  */
 public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
+    // List untuk menyimpan data transaksi
     private List<Transactions> records;
+
+    // Model tabel untuk mengelola data transaksi yang ditampilkan di tabel UI
     private TransactionTableModel tableModel = new TransactionTableModel();
 
+    // Formatter untuk mengubah angka menjadi format mata uang lokal (IDR)
+    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("in", "ID"));
+
+    // Formatter untuk mengubah tanggal menjadi format "yyyy-MM-dd"
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
+    // Utilitas tambahan untuk membantu berbagai operasi
     private final Utilities utils;
 
     // Konstruktor untuk JFrame aplikasi keuangan pribadi
@@ -112,6 +123,21 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
                 })
                 .collect(Collectors.toList()); // Mengumpulkan hasil filter menjadi daftar
 
+        // Hitung total pemasukan dan pengeluaran
+        double totalPemasukan = 0d, totalPengeluaran = 0d;
+        for (var entry : filteredRecords) {
+            switch (entry.transactionType) {
+                case INCOME ->
+                    totalPemasukan += entry.amount; // Tambahkan ke total pemasukan
+                case EXPENSE ->
+                    totalPengeluaran += entry.amount; // Tambahkan ke total pengeluaran
+            }
+        }
+
+        // Tampilkan hasil ke label
+        jLabelTotalPemasukan.setText(currencyFormatter.format(totalPemasukan));
+        jLabelTotalPengeluaran.setText(currencyFormatter.format(totalPengeluaran));
+
         this.tableModel.setRecords(filteredRecords); // Update model tabel dengan data yang sudah difilter
         jTable1.getSelectionModel().clearSelection(); // Hapus seleksi di tabel
     }
@@ -173,6 +199,11 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jDateChooserDateAwalFilter = new com.toedter.calendar.JDateChooser();
         jLabel9 = new javax.swing.JLabel();
         jDateChooserDateAkhirFilter = new com.toedter.calendar.JDateChooser();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabelTotalPemasukan = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabelTotalPengeluaran = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -439,6 +470,26 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
+        jPanel4.setLayout(new java.awt.GridLayout());
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Total Pemasukan", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
+
+        jLabelTotalPemasukan.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabelTotalPemasukan.setText("Rp. 0");
+        jPanel5.add(jLabelTotalPemasukan);
+
+        jPanel4.add(jPanel5);
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Total Pengeluaran", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
+
+        jLabelTotalPengeluaran.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabelTotalPengeluaran.setText("Rp. 0");
+        jPanel6.add(jLabelTotalPengeluaran);
+
+        jPanel4.add(jPanel6);
+
+        jPanel2.add(jPanel4, java.awt.BorderLayout.SOUTH);
+
         jSplitPane1.setRightComponent(jPanel2);
 
         getContentPane().add(jSplitPane1, java.awt.BorderLayout.CENTER);
@@ -582,7 +633,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         if (!evt.getPropertyName().equals("date")) {
             return; // Hanya merespon perubahan properti "date"
         }
-        
+
         // Filter tanggal akhir tidak boleh kurang dari tanggal awal,
         // jadi set tanggal minimum untuk filter tanggal akhir
         // dengan tanggal yang dipilih di filter tanggal awal
@@ -595,7 +646,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         if (!evt.getPropertyName().equals("date")) {
             return; // Hanya merespon perubahan properti "date"
         }
-        
+
         // Filter tanggal awal tidak boleh lebih dari tanggal akhir,
         // jadi set tanggal maksimum untuk filter tanggal awal
         // dengan tanggal yang dipilih di filter tanggal akhir
@@ -701,9 +752,14 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelTotalPemasukan;
+    private javax.swing.JLabel jLabelTotalPengeluaran;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSpinner jSpinnerAmount;
