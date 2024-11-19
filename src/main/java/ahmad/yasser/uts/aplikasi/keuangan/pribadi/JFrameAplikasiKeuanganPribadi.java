@@ -215,6 +215,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemExportExcel = new javax.swing.JMenuItem();
+        jMenuItemKeluar = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Aplikasi Keuangan Pribadi");
@@ -560,6 +561,14 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jMenu1.add(jMenu2);
 
+        jMenuItemKeluar.setText("Keluar");
+        jMenuItemKeluar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemKeluarActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemKeluar);
+
         jMenuBar1.add(jMenu1);
 
         setJMenuBar(jMenuBar1);
@@ -780,6 +789,10 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItemExportExcelActionPerformed
 
+    private void jMenuItemKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemKeluarActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItemKeluarActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -864,6 +877,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItemExportExcel;
+    private javax.swing.JMenuItem jMenuItemKeluar;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
