@@ -5,11 +5,16 @@
 package ahmad.yasser.uts.aplikasi.keuangan.pribadi;
 
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 // Kelas ini digunakan untuk model tabel transaksi
 public class TransactionTableModel extends AbstractTableModel {
@@ -42,6 +47,72 @@ public class TransactionTableModel extends AbstractTableModel {
     // Mengambil entri transaksi berdasarkan baris
     public Transactions getEntry(int row) {
         return this.records.get(row);
+    }
+
+    public Workbook toXLSX(SimpleDateFormat dateFormatter) {
+        // Membuat workbook baru dengan format XLSX
+        var workbook = new XSSFWorkbook();
+
+        // Membuat dua sheet: Pemasukan dan Pengeluaran
+        var pemasukanSheet = workbook.createSheet("Pemasukan");
+        var pengeluaranSheet = workbook.createSheet("Pengeluaran");
+
+        // Menyiapkan format untuk kolom tanggal
+        var dateCellStyle = workbook.createCellStyle();
+        var creationHelper = workbook.getCreationHelper();
+        dateCellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(dateFormatter.toPattern()));
+
+        // Variabel untuk melacak baris terakhir di masing-masing sheet
+        var pemasukanLastRow = 0;
+        var pengeluaranLastRow = 0;
+
+        // Looping melalui setiap transaksi dalam daftar records
+        for (var entry : this.records) {
+            XSSFRow row;
+
+            // Menentukan sheet yang digunakan berdasarkan jenis transaksi
+            switch (entry.transactionType) {
+                case INCOME ->
+                    row = pemasukanSheet.createRow(++pemasukanLastRow);  // Untuk transaksi pemasukan
+                case EXPENSE ->
+                    row = pengeluaranSheet.createRow(++pengeluaranLastRow);  // Untuk transaksi pengeluaran
+                default -> {
+                    continue;  // Jika jenis transaksi tidak dikenal, lanjutkan ke iterasi berikutnya
+                }
+            }
+
+            // Menambahkan data ke dalam baris: ID, Akun, Tanggal, Nominal, dan Keterangan
+            row.createCell(0).setCellValue(entry.id);
+            row.createCell(1).setCellValue(entry.account.getName());
+
+            var dateCell = row.createCell(2);
+            dateCell.setCellValue(entry.date);
+            dateCell.setCellStyle(dateCellStyle);  // Mengatur format tanggal
+
+            row.createCell(3).setCellValue(entry.amount);
+            row.createCell(4).setCellValue(entry.note);
+        }
+
+        // Menyiapkan style untuk header
+        var headerStyle = workbook.createCellStyle();
+        var font = workbook.createFont();
+        font.setBold(true);  // Membuat font header menjadi tebal
+        headerStyle.setFont(font);
+
+        // Menambahkan header ke masing-masing sheet
+        var headers = new String[]{"ID", "Akun", "Tanggal", "Nominal (Rp. )", "Keterangan"};
+        for (var sheet : new XSSFSheet[]{pemasukanSheet, pengeluaranSheet}) {
+            var headerRow = sheet.createRow(0);
+            for (var i = 0; i < headers.length; i += 1) {
+                var cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);  // Mengaplikasikan style pada header
+                sheet.autoSizeColumn(i);  // Menyesuaikan lebar kolom otomatis
+            }
+        }
+
+        // Mengembalikan workbook yang telah terisi data transaksi
+        return workbook;
     }
 
     // Mengembalikan jumlah baris pada tabel (jumlah transaksi)

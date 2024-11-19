@@ -7,6 +7,9 @@ package ahmad.yasser.uts.aplikasi.keuangan.pribadi;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Account;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.TransactionType;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -16,6 +19,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -206,12 +211,18 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jLabelTotalPemasukan = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         jLabelTotalPengeluaran = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItemExportExcel = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Aplikasi Keuangan Pribadi");
+        setMinimumSize(new java.awt.Dimension(750, 375));
 
         jSplitPane1.setDividerLocation(320);
 
+        jPanel1.setMinimumSize(new java.awt.Dimension(320, 250));
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -535,6 +546,24 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         getContentPane().add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
+        jMenu1.setText("File");
+
+        jMenu2.setText("Export Database");
+
+        jMenuItemExportExcel.setText("Excel (.XLSX)");
+        jMenuItemExportExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExportExcelActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItemExportExcel);
+
+        jMenu1.add(jMenu2);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -716,6 +745,41 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jDateChooserDateAkhirFilter.setDate(null);
     }//GEN-LAST:event_jButtonResetFilterActionPerformed
 
+    private void jMenuItemExportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportExcelActionPerformed
+        // Membuat JFileChooser untuk memilih lokasi dan nama file untuk ekspor
+        var fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export File Excel");
+
+        // Mengatur filter hanya untuk file Excel dengan ekstensi .xlsx
+        fileChooser.setFileFilter(new FileNameExtensionFilter("File Excel (*.xlsx)", "xlsx"));
+
+        // Menampilkan dialog untuk memilih lokasi penyimpanan
+        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            // Jika pengguna membatalkan, tampilkan informasi dan keluar dari metode
+            utils.showInformationDialog("Export file excel dibatalkan!");
+            return;
+        }
+
+        // Mendapatkan file yang dipilih oleh pengguna
+        var file = fileChooser.getSelectedFile();
+
+        // Menambahkan ekstensi .xlsx jika belum ada pada nama file
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new File(file.getAbsolutePath() + ".xlsx");  // Menambahkan ekstensi jika perlu
+        }
+
+        try (var workbook = tableModel.toXLSX(dateFormatter); // Membuat workbook dari model tabel
+                 var excelFile = new FileOutputStream(file)) {  // Membuka output stream ke file yang dipilih
+            // Menulis workbook ke file
+            workbook.write(excelFile);
+            // Menampilkan dialog berhasil setelah file berhasil diekspor
+            utils.showInformationDialog("Berhasil export file excel ke '%s' !".formatted(file.getPath()));
+        } catch (IOException ex) {
+            // Menangani error jika terjadi kesalahan saat menulis file
+            utils.showErrorDialog(ex, "export file excel");
+        }
+    }//GEN-LAST:event_jMenuItemExportExcelActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -796,6 +860,10 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelTotalPemasukan;
     private javax.swing.JLabel jLabelTotalPengeluaran;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItemExportExcel;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
