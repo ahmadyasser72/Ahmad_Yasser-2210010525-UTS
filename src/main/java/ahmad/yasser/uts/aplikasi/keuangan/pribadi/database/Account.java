@@ -19,11 +19,13 @@ public enum Account {
     E_WALLET(3, "E-Wallet");
 
     private static final Map<Integer, Account> lookup = new HashMap<>();
+    private static final Map<String, Account> nameLookup = new HashMap<>();
 
     static {
         // Mengisi lookup map untuk akses cepat berdasarkan ID
         for (Account account : Account.values()) {
             lookup.put(account.id, account);
+            nameLookup.put(account.name.toLowerCase(), account);
         }
     }
 
@@ -48,6 +50,11 @@ public enum Account {
     // Method untuk mencari Account berdasarkan ID
     public static Account fromId(int id) {
         return lookup.get(id);
+    }
+
+    // Method untuk mencari Account berdasarkan nama
+    public static Account fromName(String name) {
+        return nameLookup.get(name.toLowerCase()); // Mengabaikan huruf kapital
     }
 
     // Menginisialisasi tabel dan data enum di dalam tabel

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
  *
@@ -215,6 +216,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
         jMenuItemExportExcel = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItemImportExcel = new javax.swing.JMenuItem();
         jMenuItemKeluar = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -388,7 +391,6 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jTable1.setShowGrid(true);
-        jTable1.setShowVerticalLines(true);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -560,6 +562,18 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jMenu2.add(jMenuItemExportExcel);
 
         jMenu1.add(jMenu2);
+
+        jMenu3.setText("Import Database");
+
+        jMenuItemImportExcel.setText("Excel (.XLSX)");
+        jMenuItemImportExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemImportExcelActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItemImportExcel);
+
+        jMenu1.add(jMenu3);
 
         jMenuItemKeluar.setText("Keluar");
         jMenuItemKeluar.addActionListener(new java.awt.event.ActionListener() {
@@ -793,6 +807,37 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_jMenuItemKeluarActionPerformed
 
+    private void jMenuItemImportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportExcelActionPerformed
+        // Membuka dialog untuk memilih file Excel
+        var fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Import File Excel");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("File Excel (*.xlsx)", "xlsx"));
+
+        // Jika pengguna membatalkan, proses dihentikan
+        if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            utils.showInformationDialog("Import file excel dibatalkan!");
+            return;
+        }
+
+        // Mendapatkan file yang dipilih
+        var file = fileChooser.getSelectedFile();
+
+        // Menambahkan ekstensi .xlsx jika belum ada
+        if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+            file = new File(file.getAbsolutePath() + ".xlsx");
+        }
+
+        try (var workbook = WorkbookFactory.create(file)) {
+            // Mengimpor data dari file Excel ke database
+            Transactions.importXLSX(workbook);
+            utils.showInformationDialog("Berhasil import file excel '%s'!".formatted(file.getPath()));
+            this.resetForm();
+        } catch (IOException | SQLException ex) {
+            // Menangani error jika ada masalah saat import
+            utils.showErrorDialog(ex, "import file excel");
+        }
+    }//GEN-LAST:event_jMenuItemImportExcelActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -875,8 +920,10 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelTotalPengeluaran;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItemExportExcel;
+    private javax.swing.JMenuItem jMenuItemImportExcel;
     private javax.swing.JMenuItem jMenuItemKeluar;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

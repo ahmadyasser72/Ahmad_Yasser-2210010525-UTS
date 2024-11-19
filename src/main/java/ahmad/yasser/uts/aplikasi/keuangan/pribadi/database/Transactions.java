@@ -7,6 +7,10 @@ package ahmad.yasser.uts.aplikasi.keuangan.pribadi.database;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  *
@@ -106,6 +110,24 @@ public class Transactions {
         }
     }
 
+    // Method untuk melakukan insert atau update data transaksi
+    public void upsert() throws SQLException {
+        String upsertTransactionSQL = """
+            INSERT OR REPLACE INTO transactions (id, date, amount, transaction_type_id, account_id, note)
+            VALUES (?, ?, ?, ?, ?, ?);
+        """;
+
+        try (var pstmt = conn.prepareStatement(upsertTransactionSQL)) {
+            pstmt.setInt(1, this.id);
+            pstmt.setString(2, this.date);
+            pstmt.setDouble(3, this.amount);
+            pstmt.setInt(4, this.transactionType.getId());
+            pstmt.setInt(5, this.account.getId());
+            pstmt.setString(6, this.note);
+            pstmt.executeUpdate();
+        }
+    }
+
     // Method untuk menghapus transaksi
     public void delete() throws SQLException {
         String deleteTransactionSQL = "DELETE FROM transactions WHERE id = ?;";
@@ -139,6 +161,56 @@ public class Transactions {
             }
         }
 
+        return transactionsList;
+    }
+
+    // Mengimpor data transaksi dari file XLSX, lalu upsert ke database
+    public static void importXLSX(Workbook workbook) throws SQLException {
+        // Mengambil sheet "Pemasukan" dan "Pengeluaran" dari workbook
+        var pemasukanSheet = workbook.getSheet("Pemasukan");
+        var pengeluaranSheet = workbook.getSheet("Pengeluaran");
+
+        // Jika salah satu sheet tidak ada, langsung keluar dari method
+        if (pemasukanSheet == null || pengeluaranSheet == null) {
+            return;
+        }
+
+        for (var entry : Stream.of(
+                // Menggabungkan transaksi dari kedua sheet "Pemasukan" dan "Pengeluaran" dalam satu stream,
+                getTransactionsFromSheet(pemasukanSheet, TransactionType.INCOME),
+                getTransactionsFromSheet(pengeluaranSheet, TransactionType.EXPENSE))
+                .flatMap(List::stream)
+                .collect(Collectors.toList())) {
+            // kemudian melakukan upsert pada setiap transaksi secara langsung.
+            entry.upsert();
+        }
+    }
+
+    // Mengambil data transaksi dari sheet dan mengubahnya menjadi objek transaksi
+    private static List<Transactions> getTransactionsFromSheet(Sheet sheet, TransactionType transactionType) {
+        // Daftar untuk menyimpan objek transaksi
+        List<Transactions> transactionsList = new ArrayList<>();
+
+        // Membaca baris pertama untuk memulai iterasi (baris pertama biasanya header, jadi diabaikan)
+        var iterator = sheet.iterator();
+        var row = iterator.next(); // Lewati header
+
+        // Iterasi untuk setiap baris di sheet
+        while (iterator.hasNext()) {
+            row = iterator.next();
+
+            // Ambil data dari setiap kolom dalam baris
+            var id = (int) row.getCell(0).getNumericCellValue(); // Ambil ID transaksi dari kolom pertama
+            var account = Account.fromName(row.getCell(1).getStringCellValue()); // Ambil akun transaksi dari kolom kedua
+            var date = row.getCell(2).getStringCellValue(); // Ambil tanggal transaksi dari kolom ketiga
+            var amount = row.getCell(3).getNumericCellValue(); // Ambil jumlah uang transaksi dari kolom keempat
+            var note = row.getCell(4).getStringCellValue(); // Ambil catatan transaksi dari kolom kelima
+
+            // Membuat objek transaksi dan menambahkannya ke dalam list
+            transactionsList.add(new Transactions(id, date, amount, transactionType, account, note));
+        }
+
+        // Mengembalikan daftar transaksi yang sudah diproses
         return transactionsList;
     }
 }
