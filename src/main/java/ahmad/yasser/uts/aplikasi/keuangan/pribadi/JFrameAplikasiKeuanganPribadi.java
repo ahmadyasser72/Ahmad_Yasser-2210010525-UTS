@@ -200,6 +200,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         jDateChooserDateAkhirFilter = new com.toedter.calendar.JDateChooser();
         jButtonGrafikHarian = new javax.swing.JButton();
+        jButtonResetFilter = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jLabelTotalPemasukan = new javax.swing.JLabel();
@@ -306,6 +307,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
         jPanel1.add(jLabel5, gridBagConstraints);
 
+        jButtonTambah.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jButtonTambah.setText("Tambah");
         jButtonTambah.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -320,6 +322,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jButtonTambah, gridBagConstraints);
 
+        jButtonUpdate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jButtonUpdate.setText("Update");
         jButtonUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -334,6 +337,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jButtonUpdate, gridBagConstraints);
 
+        jButtonHapus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jButtonHapus.setText("Hapus");
         jButtonHapus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -486,8 +490,24 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 4;
         gridBagConstraints.ipady = 4;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
         jPanel3.add(jButtonGrafikHarian, gridBagConstraints);
+
+        jButtonResetFilter.setText("Reset Filter");
+        jButtonResetFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonResetFilterActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 4;
+        gridBagConstraints.ipady = 4;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
+        jPanel3.add(jButtonResetFilter, gridBagConstraints);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
@@ -689,6 +709,13 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         dialog.setVisible(true);
     }//GEN-LAST:event_jButtonGrafikHarianActionPerformed
 
+    private void jButtonResetFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetFilterActionPerformed
+        jComboBoxTransactionTypeFilter.setSelectedIndex(0);
+        jComboBoxAccountFilter.setSelectedIndex(0);
+        jDateChooserDateAwalFilter.setDate(null);
+        jDateChooserDateAkhirFilter.setDate(null);
+    }//GEN-LAST:event_jButtonResetFilterActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -748,6 +775,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JButton jButtonGrafikHarian;
     private javax.swing.JButton jButtonHapus;
     private javax.swing.JButton jButtonReset;
+    private javax.swing.JButton jButtonResetFilter;
     private javax.swing.JButton jButtonTambah;
     private javax.swing.JButton jButtonUpdate;
     private javax.swing.JComboBox<String> jComboBoxAccount;
