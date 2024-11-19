@@ -22,22 +22,22 @@ import javax.swing.DefaultComboBoxModel;
  * @author x
  */
 public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
-  
+
     // List untuk menyimpan data transaksi
     private List<Transactions> records;
 
     // Model tabel untuk mengelola data transaksi yang ditampilkan di tabel UI
-    private TransactionTableModel tableModel = new TransactionTableModel();
+    TransactionTableModel tableModel = new TransactionTableModel();
 
     // Formatter untuk mengubah angka menjadi format mata uang lokal (IDR)
-    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("in", "ID"));
+    final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("in", "ID"));
 
     // Formatter untuk mengubah tanggal menjadi format "yyyy-MM-dd"
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     // Utilitas tambahan untuk membantu berbagai operasi
-    private final Utilities utils;
-    
+    final Utilities utils;
+
     // Konstruktor untuk JFrame aplikasi keuangan pribadi
     // - Menginisialisasi komponen GUI
     // - Menentukan lokasi jendela agar muncul di tengah layar
@@ -199,6 +199,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jDateChooserDateAwalFilter = new com.toedter.calendar.JDateChooser();
         jLabel9 = new javax.swing.JLabel();
         jDateChooserDateAkhirFilter = new com.toedter.calendar.JDateChooser();
+        jButtonGrafikHarian = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jLabelTotalPemasukan = new javax.swing.JLabel();
@@ -368,8 +369,10 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jScrollPane2.setPreferredSize(new java.awt.Dimension(500, 200));
 
         jTable1.setModel(tableModel);
-        jTable1.setColumnSelectionAllowed(true);
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTable1.setShowGrid(true);
+        jTable1.setShowVerticalLines(true);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -383,8 +386,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
         java.awt.GridBagLayout jPanel3Layout = new java.awt.GridBagLayout();
-        jPanel3Layout.columnWidths = new int[] {0, 8, 0, 8, 0, 8, 0};
-        jPanel3Layout.rowHeights = new int[] {0, 8, 0};
+        jPanel3Layout.columnWidths = new int[] {0, 8, 0, 8, 0, 8, 0, 8, 0};
+        jPanel3Layout.rowHeights = new int[] {0, 8, 0, 8, 0};
         jPanel3.setLayout(jPanel3Layout);
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -469,9 +472,26 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanel3.add(jDateChooserDateAkhirFilter, gridBagConstraints);
 
+        jButtonGrafikHarian.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        jButtonGrafikHarian.setText("Tampilkan Grafik Harian");
+        jButtonGrafikHarian.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGrafikHarianActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 4;
+        gridBagConstraints.ipady = 4;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        jPanel3.add(jButtonGrafikHarian, gridBagConstraints);
+
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
-        jPanel4.setLayout(new java.awt.GridLayout());
+        jPanel4.setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Total Pemasukan", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
 
@@ -654,6 +674,21 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         resetControls();
     }//GEN-LAST:event_jDateChooserDateAkhirFilterPropertyChange
 
+    private void jButtonGrafikHarianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGrafikHarianActionPerformed
+        // Membuat objek JDialog yang menampilkan grafik transaksi
+        var dialog = new JDialogTransactionChart(this);
+
+        // Menentukan ukuran dialog
+        dialog.setSize(800, 600);
+        dialog.setResizable(false);
+
+        // Menempatkan dialog agar muncul di tengah-tengah frame utama
+        dialog.setLocationRelativeTo(this);
+
+        // Menampilkan dialog agar pengguna bisa melihat dan berinteraksi dengan grafik
+        dialog.setVisible(true);
+    }//GEN-LAST:event_jButtonGrafikHarianActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -700,7 +735,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
      */
     public static void main(String args[]) {
         com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.setup();
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -710,6 +745,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonGrafikHarian;
     private javax.swing.JButton jButtonHapus;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonTambah;
