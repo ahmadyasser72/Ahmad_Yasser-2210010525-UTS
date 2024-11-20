@@ -8,6 +8,8 @@ import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Account;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.TransactionType;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
 import com.jthemedetecor.OsThemeDetector;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
@@ -34,6 +36,16 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
+    // Pendeteksi mode sistem (gelap/terang), 
+    // digunakan jika aplikasi diatur untuk mengikuti tema OS (default)
+    private final OsThemeDetector systemTheme = OsThemeDetector.getDetector();
+    // Tema awal aplikasi, mengikuti pengaturan sistem
+    private final FlatLaf initialTheme;
+    // Tema gelap yang digunakan aplikasi
+    private final FlatLaf darkTheme = new FlatArcDarkOrangeIJTheme();
+    // Tema terang yang digunakan aplikasi
+    private final FlatLaf lightTheme = new FlatArcOrangeIJTheme();
+
     // List untuk menyimpan data transaksi
     private List<Transactions> records;
 
@@ -50,25 +62,46 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     final Utilities utils;
 
     // Konstruktor untuk JFrame aplikasi keuangan pribadi
+    // - Mengatur tema aplikasi berdasarkan preferensi sistem operasi (gelap atau terang)
+    // - Mengatur tema aplikasi agar dapat berubah secara dinamis mengikuti tema OS
     // - Menginisialisasi komponen GUI
     // - Menentukan lokasi jendela agar muncul di tengah layar
     // - Membuat objek utilitas untuk mempermudah beberapa operasi umum
-    // - Menginisialisasi koneksi ke database dan keluar jika terjadi kesalahan
-    // - Mengisi data pada ComboBox dan mengatur ulang formulir
+    // - Menginisialisasi koneksi ke database SQLite dan keluar jika terjadi kesalahan
+    // - Mengisi data pada ComboBox dari database
+    // - Menyinkronkan format tanggal sesuai dengan konfigurasi aplikasi
+    // - Mengatur ulang formulir ke kondisi awal
     public JFrameAplikasiKeuanganPribadi() {
+        // Menentukan tema awal (gelap atau terang) berdasarkan pengaturan sistem
+        this.initialTheme = systemTheme.isDark() ? darkTheme : lightTheme;
+        FlatLaf.setup(initialTheme);
+
         initComponents(); // Menginisialisasi komponen GUI dari form
         this.setLocationRelativeTo(null); // Menentukan lokasi jendela di tengah layar
-        this.utils = new Utilities(this); // Membuat instance utilitas untuk berbagai fungsi
+        this.utils = new Utilities(this); // Membuat instance utilitas untuk berbagai fungsi umum
+
+        // Mengatur tema berdasarkan perubahan tema sistem operasi
+        this.updateTheme();
+        this.systemTheme.registerListener(isDark -> {
+            var isUsingOSTheme = jRadioButtonMenuItemThemeOS.isSelected();
+            // Update tema hanya bila tema system dipilih
+            if (isUsingOSTheme) {
+                SwingUtilities.invokeLater(() -> {
+                    updateTheme(isDark); // Memperbarui tema secara dinamis
+                });
+            }
+        });
 
         try {
-            Transactions.initializeConnection(); // Menginisialisasi koneksi ke database
+            // Menginisialisasi koneksi ke database SQLite
+            Transactions.initializeConnection();
         } catch (SQLException ex) {
-            // Menampilkan pesan error dan keluar jika koneksi SQLite gagal
+            // Menampilkan pesan error dan keluar jika koneksi gagal
             utils.showErrorDialog(ex, "koneksi ke sqlite");
-            System.exit(1);
+            System.exit(1); // Mengakhiri aplikasi jika terjadi kesalahan koneksi
         }
 
-        this.populateComboBoxItems(); // Mengisi item pada ComboBox
+        this.populateComboBoxItems(); // Mengisi data pada ComboBox dari sumber yang relevan
         this.syncDateFormat(); // Menyinkronkan format tanggal
         this.resetForm(); // Mengatur ulang tampilan awal formulir
     }
@@ -181,6 +214,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jTextFieldId = new javax.swing.JTextField();
+        buttonGroupTema = new javax.swing.ButtonGroup();
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -224,6 +258,11 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jMenu3 = new javax.swing.JMenu();
         jMenuItemImportExcel = new javax.swing.JMenuItem();
         jMenuItemKeluar = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        jMenu5 = new javax.swing.JMenu();
+        jRadioButtonMenuItemThemeOS = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItemThemeLight = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItemThemeDark = new javax.swing.JRadioButtonMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Aplikasi Keuangan Pribadi");
@@ -231,6 +270,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jSplitPane1.setDividerLocation(320);
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Form", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
         jPanel1.setMinimumSize(new java.awt.Dimension(320, 250));
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
@@ -590,6 +630,42 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
+        jMenu4.setText("Pengaturan");
+
+        jMenu5.setText("Tema");
+
+        buttonGroupTema.add(jRadioButtonMenuItemThemeOS);
+        jRadioButtonMenuItemThemeOS.setSelected(true);
+        jRadioButtonMenuItemThemeOS.setText("Sistem");
+        jRadioButtonMenuItemThemeOS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItemThemeOSActionPerformed(evt);
+            }
+        });
+        jMenu5.add(jRadioButtonMenuItemThemeOS);
+
+        buttonGroupTema.add(jRadioButtonMenuItemThemeLight);
+        jRadioButtonMenuItemThemeLight.setText("Light");
+        jRadioButtonMenuItemThemeLight.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItemThemeLightActionPerformed(evt);
+            }
+        });
+        jMenu5.add(jRadioButtonMenuItemThemeLight);
+
+        buttonGroupTema.add(jRadioButtonMenuItemThemeDark);
+        jRadioButtonMenuItemThemeDark.setText("Dark");
+        jRadioButtonMenuItemThemeDark.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItemThemeDarkActionPerformed(evt);
+            }
+        });
+        jMenu5.add(jRadioButtonMenuItemThemeDark);
+
+        jMenu4.add(jMenu5);
+
+        jMenuBar1.add(jMenu4);
+
         setJMenuBar(jMenuBar1);
 
         pack();
@@ -843,6 +919,18 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItemImportExcelActionPerformed
 
+    private void jRadioButtonMenuItemThemeOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeOSActionPerformed
+        updateTheme();
+    }//GEN-LAST:event_jRadioButtonMenuItemThemeOSActionPerformed
+
+    private void jRadioButtonMenuItemThemeDarkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeDarkActionPerformed
+        updateTheme(true);
+    }//GEN-LAST:event_jRadioButtonMenuItemThemeDarkActionPerformed
+
+    private void jRadioButtonMenuItemThemeLightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeLightActionPerformed
+        updateTheme(false);
+    }//GEN-LAST:event_jRadioButtonMenuItemThemeLightActionPerformed
+
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
                 || utils.validasiTidakKosong(jComboBoxTransactionType, "tipe transaksi")
@@ -888,40 +976,17 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        // Membuat detektor tema berdasarkan pengaturan tema OS pengguna
-        var themeDetector = OsThemeDetector.getDetector();
-
-        // Menentukan tema gelap dan terang menggunakan FlatLaf
-        var darkTheme = new com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme();
-        var lightTheme = new com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme();
-
-        // Mendeteksi apakah pengguna lebih suka tema gelap, dan menetapkan tema awal sesuai dengan itu
-        var initialTheme = themeDetector.isDark() ? darkTheme : lightTheme;
-        // Menetapkan tema FlatLaf ke tema yang terdeteksi (gelap atau terang)
-        FlatLaf.setup(initialTheme);
-
         /* Membuat dan menampilkan form */
         java.awt.EventQueue.invokeLater(() -> {
-            var frame = new JFrameAplikasiKeuanganPribadi();
-
-            // Memperbarui tema berdasarkan tema yang terdeteksi saat ini
-            frame.updateTheme(themeDetector.isDark(), initialTheme, darkTheme, lightTheme);
-
-            // Mendaftarkan listener untuk mendeteksi perubahan tema sistem
-            themeDetector.registerListener(isDark -> {
-                // Menjalankan pembaruan tema di thread UI
-                SwingUtilities.invokeLater(() -> {
-                    // Memperbarui tema setiap kali ada perubahan tema
-                    frame.updateTheme(isDark, initialTheme, darkTheme, lightTheme);
-                });
-            });
-
-            // Menampilkan frame
-            frame.setVisible(true);
+            new JFrameAplikasiKeuanganPribadi().setVisible(true);
         });
     }
 
-    private void updateTheme(boolean isDark, FlatLaf initialTheme, FlatLaf darkTheme, FlatLaf lightTheme) {
+    private void updateTheme() {
+        this.updateTheme(systemTheme.isDark());
+    }
+
+    private void updateTheme(boolean isDark) {
         // Mengatur tema FlatLaf sesuai dengan pilihan tema (gelap atau terang)
         FlatLaf.setup(isDark ? darkTheme : lightTheme);
 
@@ -929,21 +994,21 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         SwingUtilities.updateComponentTreeUI(this);
 
         // Memperbarui tema pada komponen JDateChooser karena komponen ini tidak otomatis mengikuti perubahan tema default Swing
-        updateJDateChooserTheme(initialTheme, jDateChooserDate);
-        updateJDateChooserTheme(initialTheme, jDateChooserDateAwalFilter);
-        updateJDateChooserTheme(initialTheme, jDateChooserDateAkhirFilter);
+        updateJDateChooserTheme(jDateChooserDate);
+        updateJDateChooserTheme(jDateChooserDateAwalFilter);
+        updateJDateChooserTheme(jDateChooserDateAkhirFilter);
     }
 
-    private void updateJDateChooserTheme(FlatLaf theme, JDateChooser jDateChooser) {
+    private void updateJDateChooserTheme(JDateChooser jDateChooser) {
         // Mengambil kalender dari JDateChooser untuk mengubah tema
         var jCalendar = jDateChooser.getJCalendar();
-        
+
         // Jangan perbolehkan edit tanggal secara manual
         // karena bila diperbolehkan warna TextFieldnya akan selalu hitam
         jDateChooser.getDateEditor().setEnabled(false);
 
         // Jika tema gelap, atur warna kalender menjadi putih dan hari Minggu menjadi merah muda
-        if (theme.isDark()) {
+        if (this.initialTheme.isDark()) {
             jCalendar.setForeground(Color.WHITE); // Teks kalender berwarna putih
             jCalendar.setSundayForeground(Color.PINK); // Hari Minggu berwarna merah muda
         } else {
@@ -955,6 +1020,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupTema;
     private javax.swing.JButton jButtonGrafikHarian;
     private javax.swing.JButton jButtonHapus;
     private javax.swing.JButton jButtonReset;
@@ -982,6 +1048,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItemExportExcel;
     private javax.swing.JMenuItem jMenuItemImportExcel;
@@ -992,6 +1060,9 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItemThemeDark;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItemThemeLight;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItemThemeOS;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSpinner jSpinnerAmount;
