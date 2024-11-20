@@ -59,8 +59,6 @@ public class JDialogTransactionChart extends javax.swing.JDialog {
         // Menyesuaikan renderer untuk menggambar grafik
         var renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
-        // Menampilkan titik data pada grafik
-        renderer.setDefaultShapesVisible(true);
         // Menampilkan garis penghubung antar titik
         renderer.setDefaultLinesVisible(true);
 
@@ -87,9 +85,9 @@ public class JDialogTransactionChart extends javax.swing.JDialog {
                 // Menambahkan data ke seri berdasarkan jenis transaksi
                 switch (entry.transactionType) {
                     case INCOME -> // Jika tipe transaksi pemasukan
-                        income.add(date, entry.amount);
+                        income.addOrUpdate(date, entry.amount);
                     case EXPENSE -> // Jika tipe transaksi pengeluaran
-                        expense.add(date, entry.amount);
+                        expense.addOrUpdate(date, entry.amount);
                 }
             } catch (ParseException ex) {
                 // Menangani kesalahan parsing tanggal
