@@ -7,9 +7,6 @@ package ahmad.yasser.uts.aplikasi.keuangan.pribadi;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Account;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.TransactionType;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
-import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
 import com.jthemedetecor.OsThemeDetector;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
@@ -27,6 +24,8 @@ import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -36,15 +35,15 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
-    // Pendeteksi mode sistem (gelap/terang), 
-    // digunakan jika aplikasi diatur untuk mengikuti tema OS (default)
-    private final OsThemeDetector systemTheme = OsThemeDetector.getDetector();
-    // Tema awal aplikasi, mengikuti pengaturan sistem
-    private final FlatLaf initialTheme;
-    // Tema gelap yang digunakan aplikasi
-    private final FlatLaf darkTheme = new FlatArcDarkOrangeIJTheme();
-    // Tema terang yang digunakan aplikasi
-    private final FlatLaf lightTheme = new FlatArcOrangeIJTheme();
+    // Detektor mode tema sistem (gelap/terang).
+    // Digunakan jika aplikasi diatur untuk mengikuti tema OS (mode default).
+    private static final OsThemeDetector SYSTEM_THEME = OsThemeDetector.getDetector();
+    // Nama kelas tema gelap yang digunakan oleh aplikasi.
+    private static final String DARK_THEME = com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme.class.getName();
+    // Nama kelas tema terang yang digunakan oleh aplikasi.
+    private static final String LIGHT_THEME = com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.class.getName();
+    // Flag untuk mencatat apakah tema awal aplikasi adalah tema gelap.
+    private static final boolean INITIAL_SYSTEM_THEME_IS_DARK = SYSTEM_THEME.isDark();
 
     // List untuk menyimpan data transaksi
     private List<Transactions> records;
@@ -72,23 +71,18 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     // - Menyinkronkan format tanggal sesuai dengan konfigurasi aplikasi
     // - Mengatur ulang formulir ke kondisi awal
     public JFrameAplikasiKeuanganPribadi() {
-        // Menentukan tema awal (gelap atau terang) berdasarkan pengaturan sistem
-        this.initialTheme = systemTheme.isDark() ? darkTheme : lightTheme;
-        FlatLaf.setup(initialTheme);
-
         initComponents(); // Menginisialisasi komponen GUI dari form
+
         this.setLocationRelativeTo(null); // Menentukan lokasi jendela di tengah layar
         this.utils = new Utilities(this); // Membuat instance utilitas untuk berbagai fungsi umum
 
         // Mengatur tema berdasarkan perubahan tema sistem operasi
-        this.updateTheme();
-        this.systemTheme.registerListener(isDark -> {
+        this.updateTheme(SYSTEM_THEME.isDark());
+        SYSTEM_THEME.registerListener(isDark -> {
             var isUsingOSTheme = jRadioButtonMenuItemThemeOS.isSelected();
             // Update tema hanya bila tema system dipilih
             if (isUsingOSTheme) {
-                SwingUtilities.invokeLater(() -> {
-                    updateTheme(isDark); // Memperbarui tema secara dinamis
-                });
+                updateTheme(isDark); // Memperbarui tema secara dinamis
             }
         });
 
@@ -920,7 +914,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemImportExcelActionPerformed
 
     private void jRadioButtonMenuItemThemeOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeOSActionPerformed
-        updateTheme();
+        updateTheme(SYSTEM_THEME.isDark());
     }//GEN-LAST:event_jRadioButtonMenuItemThemeOSActionPerformed
 
     private void jRadioButtonMenuItemThemeDarkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeDarkActionPerformed
@@ -976,27 +970,42 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        try {
+            // Set tema aplikasi awal sesuai dengan tema sistem saat aplikasi baru mulai
+            UIManager.setLookAndFeel(INITIAL_SYSTEM_THEME_IS_DARK ? DARK_THEME : LIGHT_THEME);
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+            // Tampilkan error jika ada masalah dengan Look and Feel
+            ex.printStackTrace();
+        }
+
         /* Membuat dan menampilkan form */
         java.awt.EventQueue.invokeLater(() -> {
             new JFrameAplikasiKeuanganPribadi().setVisible(true);
         });
     }
 
-    private void updateTheme() {
-        this.updateTheme(systemTheme.isDark());
-    }
-
+    // Memperbarui tema aplikasi berdasarkan pilihan tema gelap atau terang.
     private void updateTheme(boolean isDark) {
-        // Mengatur tema FlatLaf sesuai dengan pilihan tema (gelap atau terang)
-        FlatLaf.setup(isDark ? darkTheme : lightTheme);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Mengatur tema sesuai dengan pilihan tema (gelap atau terang)
+                UIManager.setLookAndFeel(isDark ? DARK_THEME : LIGHT_THEME);
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+                // Menampilkan dialog error jika terjadi kesalahan dalam pengaturan tema
+                utils.showErrorDialog(ex, "mengatur tema");
+                return;
+            }
 
-        // Memperbarui tampilan komponen UI setelah perubahan tema
-        SwingUtilities.updateComponentTreeUI(this);
+            // Memperbarui tampilan komponen UI setelah perubahan tema
+            SwingUtilities.updateComponentTreeUI(this);
+            this.pack();
 
-        // Memperbarui tema pada komponen JDateChooser karena komponen ini tidak otomatis mengikuti perubahan tema default Swing
-        updateJDateChooserTheme(jDateChooserDate);
-        updateJDateChooserTheme(jDateChooserDateAwalFilter);
-        updateJDateChooserTheme(jDateChooserDateAkhirFilter);
+            // Memperbarui tema pada komponen JDateChooser
+            // JDateChooser tidak otomatis mengikuti tema default Swing
+            updateJDateChooserTheme(jDateChooserDate);
+            updateJDateChooserTheme(jDateChooserDateAwalFilter);
+            updateJDateChooserTheme(jDateChooserDateAkhirFilter);
+        });
     }
 
     private void updateJDateChooserTheme(JDateChooser jDateChooser) {
@@ -1008,7 +1017,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jDateChooser.getDateEditor().setEnabled(false);
 
         // Jika tema gelap, atur warna kalender menjadi putih dan hari Minggu menjadi merah muda
-        if (this.initialTheme.isDark()) {
+        if (INITIAL_SYSTEM_THEME_IS_DARK) {
             jCalendar.setForeground(Color.WHITE); // Teks kalender berwarna putih
             jCalendar.setSundayForeground(Color.PINK); // Hari Minggu berwarna merah muda
         } else {
