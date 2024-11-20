@@ -7,6 +7,10 @@ package ahmad.yasser.uts.aplikasi.keuangan.pribadi;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Account;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.TransactionType;
 import ahmad.yasser.uts.aplikasi.keuangan.pribadi.database.Transactions;
+import com.formdev.flatlaf.FlatLaf;
+import com.jthemedetecor.OsThemeDetector;
+import com.toedter.calendar.JDateChooser;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -883,15 +888,71 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.setup();
+        // Membuat detektor tema berdasarkan pengaturan tema OS pengguna
+        var themeDetector = OsThemeDetector.getDetector();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new JFrameAplikasiKeuanganPribadi().setVisible(true);
-            }
+        // Menentukan tema gelap dan terang menggunakan FlatLaf
+        var darkTheme = new com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme();
+        var lightTheme = new com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme();
+
+        // Mendeteksi apakah pengguna lebih suka tema gelap, dan menetapkan tema awal sesuai dengan itu
+        var initialTheme = themeDetector.isDark() ? darkTheme : lightTheme;
+        // Menetapkan tema FlatLaf ke tema yang terdeteksi (gelap atau terang)
+        FlatLaf.setup(initialTheme);
+
+        /* Membuat dan menampilkan form */
+        java.awt.EventQueue.invokeLater(() -> {
+            var frame = new JFrameAplikasiKeuanganPribadi();
+
+            // Memperbarui tema berdasarkan tema yang terdeteksi saat ini
+            frame.updateTheme(themeDetector.isDark(), initialTheme, darkTheme, lightTheme);
+
+            // Mendaftarkan listener untuk mendeteksi perubahan tema sistem
+            themeDetector.registerListener(isDark -> {
+                // Menjalankan pembaruan tema di thread UI
+                SwingUtilities.invokeLater(() -> {
+                    // Memperbarui tema setiap kali ada perubahan tema
+                    frame.updateTheme(isDark, initialTheme, darkTheme, lightTheme);
+                });
+            });
+
+            // Menampilkan frame
+            frame.setVisible(true);
         });
     }
+
+    private void updateTheme(boolean isDark, FlatLaf initialTheme, FlatLaf darkTheme, FlatLaf lightTheme) {
+        // Mengatur tema FlatLaf sesuai dengan pilihan tema (gelap atau terang)
+        FlatLaf.setup(isDark ? darkTheme : lightTheme);
+
+        // Memperbarui tampilan komponen UI setelah perubahan tema
+        SwingUtilities.updateComponentTreeUI(this);
+
+        // Memperbarui tema pada komponen JDateChooser karena komponen ini tidak otomatis mengikuti perubahan tema default Swing
+        updateJDateChooserTheme(initialTheme, jDateChooserDate);
+        updateJDateChooserTheme(initialTheme, jDateChooserDateAwalFilter);
+        updateJDateChooserTheme(initialTheme, jDateChooserDateAkhirFilter);
+    }
+
+    private void updateJDateChooserTheme(FlatLaf theme, JDateChooser jDateChooser) {
+        // Mengambil kalender dari JDateChooser untuk mengubah tema
+        var jCalendar = jDateChooser.getJCalendar();
+        
+        // Jangan perbolehkan edit tanggal secara manual
+        // karena bila diperbolehkan warna TextFieldnya akan selalu hitam
+        jDateChooser.getDateEditor().setEnabled(false);
+
+        // Jika tema gelap, atur warna kalender menjadi putih dan hari Minggu menjadi merah muda
+        if (theme.isDark()) {
+            jCalendar.setForeground(Color.WHITE); // Teks kalender berwarna putih
+            jCalendar.setSundayForeground(Color.PINK); // Hari Minggu berwarna merah muda
+        } else {
+            // Jika tema terang, atur warna kalender menjadi hitam dan hari Minggu menjadi merah
+            jCalendar.setForeground(Color.BLACK); // Teks kalender berwarna hitam
+            jCalendar.setSundayForeground(Color.RED); // Hari Minggu berwarna merah
+        }
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonGrafikHarian;
