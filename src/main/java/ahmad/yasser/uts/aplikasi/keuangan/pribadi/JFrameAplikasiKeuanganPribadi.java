@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -240,6 +241,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jDateChooserDateAkhirFilter = new com.toedter.calendar.JDateChooser();
         jButtonGrafikHarian = new javax.swing.JButton();
         jButtonResetFilter = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        jComboBoxPresetFilterTanggal = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jLabelTotalPemasukan = new javax.swing.JLabel();
@@ -443,8 +446,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
         java.awt.GridBagLayout jPanel3Layout = new java.awt.GridBagLayout();
-        jPanel3Layout.columnWidths = new int[] {0, 8, 0, 8, 0, 8, 0, 8, 0};
-        jPanel3Layout.rowHeights = new int[] {0, 8, 0, 8, 0};
+        jPanel3Layout.columnWidths = new int[] {0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0};
+        jPanel3Layout.rowHeights = new int[] {0, 8, 0, 8, 0, 8, 0};
         jPanel3.setLayout(jPanel3Layout);
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -471,7 +474,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel7.setText("Akun");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanel3.add(jLabel7, gridBagConstraints);
@@ -484,7 +487,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanel3.add(jComboBoxAccountFilter, gridBagConstraints);
@@ -512,7 +515,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel9.setText("Tanggal Akhir");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanel3.add(jLabel9, gridBagConstraints);
@@ -524,7 +527,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanel3.add(jDateChooserDateAkhirFilter, gridBagConstraints);
@@ -537,8 +540,8 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 4;
@@ -554,13 +557,35 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 4;
         gridBagConstraints.ipady = 4;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
         jPanel3.add(jButtonResetFilter, gridBagConstraints);
+
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel10.setText("Preset Filter Tanggal");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jLabel10, gridBagConstraints);
+
+        jComboBoxPresetFilterTanggal.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Minggu ini", "7 hari terakhir", "Bulan ini", "30 hari terakhir", "90 hari terakhir", "Tahun ini", "6 bulan terakhir", "12 bulan terakhir" }));
+        jComboBoxPresetFilterTanggal.setSelectedIndex(-1);
+        jComboBoxPresetFilterTanggal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxPresetFilterTanggalActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanel3.add(jComboBoxPresetFilterTanggal, gridBagConstraints);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
@@ -841,6 +866,7 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
         jComboBoxAccountFilter.setSelectedIndex(0);
         jDateChooserDateAwalFilter.setDate(null);
         jDateChooserDateAkhirFilter.setDate(null);
+        jComboBoxPresetFilterTanggal.setSelectedIndex(-1);
     }//GEN-LAST:event_jButtonResetFilterActionPerformed
 
     private void jMenuItemExportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportExcelActionPerformed
@@ -924,6 +950,57 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private void jRadioButtonMenuItemThemeLightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemThemeLightActionPerformed
         updateTheme(false);
     }//GEN-LAST:event_jRadioButtonMenuItemThemeLightActionPerformed
+
+    private void jComboBoxPresetFilterTanggalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxPresetFilterTanggalActionPerformed
+        // Pastikan item pada ComboBox tidak null, jika null maka langsung keluar dari method
+        if (jComboBoxPresetFilterTanggal.getSelectedItem() == null) {
+            return;
+        }
+
+        // Inisialisasi objek Calendar untuk manipulasi tanggal
+        var calendar = Calendar.getInstance();
+        var today = calendar.getTime();
+
+        // Set tanggal akhir pada filter default ke hari ini
+        jDateChooserDateAkhirFilter.setDate(today);
+
+        // Cek preset filter yang dipilih pada ComboBox
+        switch (jComboBoxPresetFilterTanggal.getSelectedItem().toString()) {
+            case "Minggu ini" ->
+                // Set tanggal awal ke hari pertama dalam minggu ini sesuai dengan pengaturan lokal
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+            case "7 hari terakhir" ->
+                // Kurangi 6 hari dari hari ini untuk mencakup 7 hari terakhir
+                calendar.add(Calendar.DAY_OF_YEAR, -6);
+            case "Bulan ini" ->
+                // Set tanggal awal ke hari pertama dalam bulan ini
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            case "30 hari terakhir" ->
+                // Kurangi 29 hari dari hari ini untuk mencakup 30 hari terakhir
+                calendar.add(Calendar.DAY_OF_YEAR, -29);
+            case "90 hari terakhir" ->
+                // Kurangi 89 hari dari hari ini untuk mencakup 90 hari terakhir
+                calendar.add(Calendar.DAY_OF_YEAR, -89);
+            case "Tahun ini" ->
+                // Set tanggal awal ke hari pertama dalam tahun ini
+                calendar.set(Calendar.DAY_OF_YEAR, 1);
+            case "6 bulan terakhir" -> {
+                // Kurangi 5 bulan dari bulan ini
+                calendar.add(Calendar.MONTH, -5);
+                // Set tanggal ke hari pertama dari bulan yang dihitung
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            }
+            case "12 bulan terakhir" -> {
+                // Kurangi 1 tahun dari tahun ini
+                calendar.add(Calendar.YEAR, -1);
+                // Tambahkan 1 hari untuk menghindari overlap
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+            }
+        }
+
+        // Set tanggal awal pada filter sesuai hasil manipulasi kalender
+        jDateChooserDateAwalFilter.setDate(calendar.getTime());
+    }//GEN-LAST:event_jComboBoxPresetFilterTanggalActionPerformed
 
     private Optional<Transactions> getTransactionFromInput() {
         if (utils.validasiTidakKosong(jDateChooserDate, "transaksi")
@@ -1038,12 +1115,14 @@ public class JFrameAplikasiKeuanganPribadi extends javax.swing.JFrame {
     private javax.swing.JButton jButtonUpdate;
     private javax.swing.JComboBox<String> jComboBoxAccount;
     private javax.swing.JComboBox<String> jComboBoxAccountFilter;
+    private javax.swing.JComboBox<String> jComboBoxPresetFilterTanggal;
     private javax.swing.JComboBox<String> jComboBoxTransactionType;
     private javax.swing.JComboBox<String> jComboBoxTransactionTypeFilter;
     private com.toedter.calendar.JDateChooser jDateChooserDate;
     private com.toedter.calendar.JDateChooser jDateChooserDateAkhirFilter;
     private com.toedter.calendar.JDateChooser jDateChooserDateAwalFilter;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
