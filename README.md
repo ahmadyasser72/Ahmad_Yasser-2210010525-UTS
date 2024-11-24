@@ -1,5 +1,8 @@
 # Aplikasi Keuangan Pribadi
 
+> [!NOTE]
+> Video demo: https://youtu.be/nTN96uBromk
+
 Aplikasi desktop sederhana untuk mengelola keuangan pribadi, dikembangkan dengan Java Swing dan SQLite sebagai basis data. 🌟
 
 ## Fitur Utama
